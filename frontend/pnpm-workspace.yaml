@@ -1,0 +1,10 @@
+packages:
+  - .
+
+allowBuilds:
+  '@swc/core': true
+
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@swc/core'
+  - esbuild
