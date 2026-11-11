@@ -17,6 +17,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['./src/setupTests.ts'],
     coverage: {
       exclude: ['./src/main.tsx', '**/*.cjs', '**/*.d.ts', 'vite.config.ts'],
       reporter: ['lcov', 'json', 'html', 'json-summary'],

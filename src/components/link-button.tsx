@@ -10,17 +10,11 @@ function LinkButton({ to, children, ...buttonProps }: LinkButtonProps) {
     <Button
       variant="ghost"
       w="full"
-      color="var(--color-texto)"
+      color="fg"
       justifyContent="flex-start"
       textAlign="left"
-      _hover={{
-        bg: 'var(--color-principal-hover)',
-        color: 'var(--color-texto)',
-      }}
-      _currentPage={{
-        bg: 'var(--color-principal-hover)',
-        color: 'var(--color-principal)',
-      }}
+      _hover={{ bg: 'bg.emphasized', color: 'fg' }}
+      _currentPage={{ bg: 'bg.muted', color: 'brand.fg' }}
       asChild
       fontSize="md"
       {...buttonProps}
@@ -33,5 +27,3 @@ function LinkButton({ to, children, ...buttonProps }: LinkButtonProps) {
 }
 
 export default LinkButton
-
-

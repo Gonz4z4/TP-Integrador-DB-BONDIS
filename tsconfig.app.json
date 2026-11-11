@@ -25,7 +25,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["vitest", "@testing-library/react", "@testing-library/user-event"]
   },
   "include": ["src"]
 }

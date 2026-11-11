@@ -1,0 +1,131 @@
+import {
+  Badge,
+  Box,
+  Container,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  Spinner,
+  Stack,
+  Text,
+} from '@chakra-ui/react'
+import { useParams } from 'react-router-dom'
+import RamalesList from '@/components/lineas/RamalesList'
+import NotaBadge from '@/components/opiniones/NotaBadge'
+import OpinionCard from '@/components/opiniones/OpinionCard'
+import OpinionForm from '@/components/opiniones/OpinionForm'
+import { useCatalogo } from '@/hooks/useCatalogo'
+import ErrorPage from './ErrorPage'
+
+const LineaDetalle = () => {
+  const { numero } = useParams()
+  const { lineas, cargando, recargar } = useCatalogo()
+
+  if (cargando) {
+    return (
+      <Flex justify="center" py={24}>
+        <Spinner color="brand.solid" />
+      </Flex>
+    )
+  }
+
+  const linea = lineas.find((l) => l.numero === numero)
+  if (!linea) {
+    return <ErrorPage />
+  }
+
+  const { desde, hasta } = linea.extremos
+  const opiniones = [...linea.opiniones].sort(
+    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+  )
+  const cantidad = linea.cantidadOpiniones
+
+  return (
+    <>
+      <Box bg="bg.subtle" borderBottomWidth="1px" borderColor="border">
+        <Container maxW="1200px" px={8} py={10}>
+          <Flex
+            gap={6}
+            align="center"
+            direction={{ base: 'column', md: 'row' }}
+          >
+            <Flex
+              boxSize="28"
+              borderRadius="lg"
+              bg="brand.solid"
+              color="brand.contrast"
+              align="center"
+              justify="center"
+              fontFamily="heading"
+              fontWeight="extrabold"
+              fontSize={linea.nombre.length > 3 ? '3xl' : '6xl'}
+              flexShrink={0}
+            >
+              {linea.nombre}
+            </Flex>
+            <Stack gap={3} flex="1">
+              <HStack gap={2} wrap="wrap">
+                <Badge bg="bg.emphasized" color="fg">
+                  {linea.camara}
+                </Badge>
+                <Badge bg="bg.muted" color="fg.muted">
+                  {linea.jurisdiccion}
+                </Badge>
+                {linea.modalidades.map((m) => (
+                  <Badge key={m} bg="bg.muted" color="fg.muted">
+                    {m}
+                  </Badge>
+                ))}
+              </HStack>
+              <Heading
+                as="h1"
+                fontSize={{ base: '3xl', md: '5xl' }}
+                letterSpacing="-0.03em"
+              >
+                Línea {linea.nombre}
+              </Heading>
+              <Text color="fg.muted" fontSize="lg">
+                {desde} → {hasta}
+              </Text>
+              <HStack gap={3}>
+                <NotaBadge nota={linea.promedio} grande />
+                <Text color="fg.muted" fontSize="sm">
+                  {cantidad} opinion{cantidad === 1 ? '' : 'es'}
+                </Text>
+              </HStack>
+            </Stack>
+          </Flex>
+        </Container>
+      </Box>
+
+      <Container maxW="1200px" px={8} pt={8}>
+        <Grid templateColumns={{ base: '1fr', lg: 'repeat(12, 1fr)' }} gap={8}>
+          <GridItem colSpan={{ base: 1, lg: 7 }}>
+            <Stack gap={10}>
+              <RamalesList ramales={linea.ramales} />
+              <Stack gap={4}>
+                <Heading size="lg">Opiniones</Heading>
+                {opiniones.length === 0 && (
+                  <Text color="fg.muted">
+                    Todavía nadie opinó sobre esta línea. ¡Sé el primero!
+                  </Text>
+                )}
+                {opiniones.map((opinion) => (
+                  <OpinionCard key={opinion.idOpinion} opinion={opinion} />
+                ))}
+              </Stack>
+            </Stack>
+          </GridItem>
+
+          <GridItem colSpan={{ base: 1, lg: 5 }}>
+            <OpinionForm linea={linea} onCreada={recargar} />
+          </GridItem>
+        </Grid>
+      </Container>
+    </>
+  )
+}
+
+export default LineaDetalle

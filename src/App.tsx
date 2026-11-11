@@ -1,20 +1,18 @@
-import './App.css'
 import { Box, Flex } from '@chakra-ui/react'
 import { Outlet } from 'react-router-dom'
+import Footer from './components/layout/Footer'
+import Header from './components/layout/Header'
 import { Toaster } from './components/ui/toaster'
 
-const App = () => {
-  
-  
-
-  return (
-      <Flex w="100vw" minH="100vh">
-        <Box w="100%" flex="1">
-          <Outlet />
-        </Box>
-      <Toaster />
-      </Flex>      
-  )
-}
+const App = () => (
+  <Flex direction="column" minH="100vh" w="100%">
+    <Header />
+    <Box as="main" flex="1" w="full">
+      <Outlet />
+    </Box>
+    <Footer />
+    <Toaster />
+  </Flex>
+)
 
 export default App

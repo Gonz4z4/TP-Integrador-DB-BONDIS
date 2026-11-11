@@ -1,21 +1,17 @@
-import { Button } from "@chakra-ui/react"
+import { Button, type ButtonProps } from '@chakra-ui/react'
 
-function GhostButton({ ...buttonProps }) {
+function GhostButton({ ...buttonProps }: ButtonProps) {
   return (
     <Button
       variant="ghost"
       w="full"
-      color="var(--color-texto)"
+      color="fg"
       justifyContent="flex-start"
       textAlign="left"
-      _hover={{
-        bg: 'var(--color-principal-hover)',
-        color: 'var(--color-texto)',
-      }}
+      _hover={{ bg: 'bg.emphasized', color: 'fg' }}
       fontSize="md"
       {...buttonProps}
-    >
-    </Button>
+    />
   )
 }
 
