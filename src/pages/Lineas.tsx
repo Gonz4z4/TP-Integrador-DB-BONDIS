@@ -10,16 +10,40 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import LineaCard from '@/components/lineas/LineaCard'
 import { useCatalogo } from '@/hooks/useCatalogo'
+import { useEffect, useMemo, useState } from 'react'
+import LineaService from '@/services/lineaService'
 
 const Lineas = () => {
   const { lineas, cargando } = useCatalogo()
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
   const camara = params.get('camara') ?? ''
+  const [idsBackend, setIdsBackend] = useState<Set<number>>(new Set())
+
+  useEffect(() => {
+    const texto = q.trim()
+    if (!texto) {
+      setIdsBackend(new Set())
+      return
+    }
+    let vigente = true
+    const timer = setTimeout(async () => {
+      try {
+        const ids = await LineaService.buscar(texto)
+        if (vigente) {setIdsBackend(new Set(ids))}
+      } catch (e) {
+        console.error('Error en la búsqueda', e)
+        if (vigente) { setIdsBackend(new Set()) }
+      }
+    }, 300)
+    return () => {
+      vigente = false
+      clearTimeout(timer)
+    }
+  }, [q])
 
   const cambiarParam = (clave: string, valor: string) => {
     const siguiente = new URLSearchParams(params)
@@ -39,9 +63,11 @@ const Lineas = () => {
   const filtradas = useMemo(
     () =>
       lineas.filter(
-        (l) => (!camara || l.camara === camara) && l.coincideCon(q)
+        (l) =>
+          (!camara || l.camara === camara) &&
+          (l.coincideCon(q) || idsBackend.has(l.idLinea))
       ),
-    [lineas, q, camara]
+    [lineas, q, camara, idsBackend]
   )
 
   return (
@@ -59,7 +85,7 @@ const Lineas = () => {
           <Input
             value={q}
             onChange={(e) => cambiarParam('q', e.target.value)}
-            placeholder="Número de línea o lugar (ej: Retiro, 106)"
+            placeholder="Busca la línea o una palabra clave..."
             maxW="md"
             bg="bg.panel"
             borderColor="border"

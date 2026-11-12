@@ -45,10 +45,19 @@ export const LineaService = {
         nota: o.nota,
         comentario: o.comentario,
         fecha: o.fecha,
-      })
-    ),
-  }
-},
+        })
+      ),
+    }
+  },
+
+   // GET /lineas/buscar?texto=...
+  async buscar(texto: string): Promise<number[]> {
+    const { data } = await axios.get<{ id: string }[]>(
+      `${REST_SERVER_URL}/lineas/buascar`,
+      { params: { texto } }
+    )
+    return data.map((r) => Number(r.id))
+  },
 }
 
 export default LineaService

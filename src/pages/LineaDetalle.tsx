@@ -35,7 +35,7 @@ const LineaDetalle = () => {
 const linea = lineas.find((l) => l.numero === numero)
 
 const cargarDetalle = useCallback(async () => {
-  if (!linea?.idLinea) return
+  if (!linea?.idLinea){ return } 
   try {
     setDetalle(await LineaService.getDetalle(linea.idLinea))
   } catch (e) {
@@ -65,7 +65,7 @@ const eliminar = async (idOpinion: number) => {
     )
   }
 
-  if (!linea) return <ErrorPage />
+  if (!linea) { return <ErrorPage /> }
 
 const ramales = detalle?.ramales ?? []
 const opiniones = [...(detalle?.opiniones ?? [])].sort(
