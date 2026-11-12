@@ -10,16 +10,54 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import LineaCard from '@/components/lineas/LineaCard'
-import { useCatalogo } from '@/hooks/useCatalogo'
+import { showToast } from '@/components/toast'
+import { getMensajeError } from '@/lib/errorHandler'
+import type { Linea } from '@/dominio/linea'
+import LineaService from '@/services/lineaService'
 
 const Lineas = () => {
-  const { lineas, cargando } = useCatalogo()
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
   const camara = params.get('camara') ?? ''
+  const [lineas, setLineas] = useState<Linea[]>([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    let vigente = true
+
+    const cargarLineas = async () => {
+      setCargando(true)
+      try {
+        const resultado = q.trim()
+          ? await LineaService.buscarLineas(q.trim())
+          : await LineaService.getLineas()
+        if (vigente) {
+          setLineas(resultado)
+        }
+      } catch (error) {
+        if (vigente) {
+          showToast(getMensajeError(error), 'error')
+          setLineas([])
+        }
+      } finally {
+        if (vigente) {
+          setCargando(false)
+        }
+      }
+    }
+
+    const temporizador = window.setTimeout(() => {
+      void cargarLineas()
+    }, 800)
+
+    return () => {
+      vigente = false
+      window.clearTimeout(temporizador)
+    }
+  }, [q])
 
   const cambiarParam = (clave: string, valor: string) => {
     const siguiente = new URLSearchParams(params)
@@ -37,11 +75,8 @@ const Lineas = () => {
   )
 
   const filtradas = useMemo(
-    () =>
-      lineas.filter(
-        (l) => (!camara || l.camara === camara) && l.coincideCon(q)
-      ),
-    [lineas, q, camara]
+    () => lineas.filter((l) => !camara || l.camara === camara),
+    [lineas, camara]
   )
 
   return (
