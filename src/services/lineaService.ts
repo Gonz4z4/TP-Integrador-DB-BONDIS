@@ -6,8 +6,8 @@ import { Opinion } from '@/dominio/opinion'
 
 const aLinea = (dto: LineaDto) =>
   new Linea(dto.id, dto.numero, dto.jurisdiccion, dto.camara, [], [], {
-    promedio: dto.promedio,
-    cantidadOpiniones: dto.cantidadOpiniones,
+    promedio: dto.promedio ?? null,
+    cantidadOpiniones: dto.cantidadOpiniones ?? 0,
   })
 
  const aRamal = (r: RamalDto) =>
@@ -33,22 +33,14 @@ export const LineaService = {
     return data.map(aLinea)
   },
 
- async getDetalle(id: number) {
-  const { data } = await axios.get<LineaDetalleDto>(`${REST_SERVER_URL}/lineas/${id}`)
-  return {
-    ramales: data.ramales.map(aRamal),
-    opiniones: data.opiniones.map(
-      (o): Opinion => ({
-        idOpinion: o.id!,
-        idLinea: id,
-        usuario: o.usuario,
-        nota: o.nota,
-        comentario: o.comentario,
-        fecha: o.fecha,
-      })
-    ),
-  }
-},
+  // GET /lineas/buscar?texto={texto}
+  async buscarLineas(texto: string): Promise<Linea[]> {
+    const { data } = await axios.get<LineaDto[]>(
+      `${REST_SERVER_URL}/lineas/buscar`,
+      { params: { texto } }
+    )
+    return data.map(aLinea)
+  },
 }
 
 export default LineaService

@@ -3,8 +3,8 @@ export type LineaDto = {
   numero: string
   jurisdiccion: string
   camara: string
-  promedio: number | null
-  cantidadOpiniones: number
+  promedio?: number | null
+  cantidadOpiniones?: number
 }
 
 export type TerminalDto = {
