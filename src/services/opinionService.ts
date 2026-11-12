@@ -19,6 +19,10 @@ export const OpinionService = {
     )
     return data
   },
+
+  async eliminarOpinion(idOpinion: number): Promise<void> {
+    await axios.delete(`${REST_SERVER_URL}/opiniones/${idOpinion}`)
+  },
 }
 
 export default OpinionService

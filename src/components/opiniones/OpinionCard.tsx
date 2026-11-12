@@ -1,17 +1,38 @@
-import { Box, Flex, HStack, Link, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, HStack, Link, Stack, Text, Icon } from '@chakra-ui/react'
 import { Link as RouterLink } from 'react-router-dom'
 import type { Linea } from '@/dominio/linea'
 import type { Opinion } from '@/dominio/opinion'
 import { fechaCorta } from '@/lib/fechas'
 import NotaBadge from './NotaBadge'
+import { MdDeleteOutline } from 'react-icons/md'
+import { useState } from 'react'
 
 type OpinionCardProps = {
   opinion: Opinion
   /** Si se pasa, muestra a qué línea corresponde la opinión (útil en el Home). */
   linea?: Linea
+  onEliminar?: () => Promise<void>
 }
 
-const OpinionCard = ({ opinion, linea }: OpinionCardProps) => (
+const OpinionCard = ({ opinion, linea, onEliminar }: OpinionCardProps) => {
+
+  const [confirmando, setConfirmando] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+
+  const eliminar = async () => {
+    if (!onEliminar) {
+      return
+    }
+    setEliminando(true)
+    try {
+      await onEliminar()
+    } finally {
+      setEliminando(false)
+      setConfirmando(false)
+    }
+  }
+
+  return (
   <Box
     bg="bg.panel"
     borderWidth="1px"
@@ -62,8 +83,30 @@ const OpinionCard = ({ opinion, linea }: OpinionCardProps) => (
         <NotaBadge nota={opinion.nota} />
       </Flex>
       <Text lineHeight="tall">{opinion.comentario}</Text>
+      {onEliminar &&(
+        <HStack justify="flex-end" gap={2}>
+          {confirmando ? (
+            <>
+              <Text fontSize="sm" color="fg.muted">
+                ¿Querés eliminar tu opinión?
+              </Text>
+              <Button size="xs" variant="outline" onClick={() => setConfirmando(false)} disabled={eliminando}>
+                Cancelar
+              </Button>
+              <Button size="xs" bg="peligro.solid" color="white" onClick={eliminar} loading={eliminando}>
+                Sí, eliminar
+              </Button>
+            </>
+          ) : (
+            <Button size="xs" variant="ghost" color="peligro.fg" onClick={() => setConfirmando(true)}>
+              <Icon as={MdDeleteOutline}/> Eliminar
+            </Button> 
+          )}
+        </HStack>
+      )}
     </Stack>
   </Box>
-)
+  )
+}
 
 export default OpinionCard
