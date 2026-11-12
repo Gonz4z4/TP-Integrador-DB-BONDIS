@@ -37,21 +37,25 @@ const LineaCard = ({ linea }: { linea: Linea }) => {
               {linea.nombre}
             </Flex>
             <Stack gap={1} flex="1" minW="0">
-              <Text
-                fontWeight="semibold"
-                lineClamp={1}
-                _groupHover={{ color: 'brand.fg' }}
-              >
-                {desde} → {hasta}
-              </Text>
+              {(desde || hasta) && (
+                <Text
+                  fontWeight="semibold"
+                  lineClamp={1}
+                  _groupHover={{ color: 'brand.fg' }}
+                >
+                  {desde} → {hasta}
+                </Text>
+              )}
               <HStack gap={2} wrap="wrap">
                 <Badge bg="bg.emphasized" color="fg">
                   {linea.camara}
                 </Badge>
-                <Text fontSize="xs" color="fg.muted">
-                  {linea.ramales.length} ramal
-                  {linea.ramales.length === 1 ? '' : 'es'}
-                </Text>
+                {linea.ramales.length > 0 && (
+                  <Text fontSize="xs" color="fg.muted">
+                    {linea.ramales.length} ramal
+                    {linea.ramales.length === 1 ? '' : 'es'}
+                  </Text>
+                )}
                 {linea.modalidades.includes('EXPRESO') && (
                   <Badge bg="brand.muted" color="brand.fg">
                     Expreso

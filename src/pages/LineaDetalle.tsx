@@ -86,9 +86,11 @@ const LineaDetalle = () => {
               >
                 Línea {linea.nombre}
               </Heading>
-              <Text color="fg.muted" fontSize="lg">
-                {desde} → {hasta}
-              </Text>
+              {(desde || hasta) && (
+                <Text color="fg.muted" fontSize="lg">
+                  {desde} → {hasta}
+                </Text>
+              )}
               <HStack gap={3}>
                 <NotaBadge nota={linea.promedio} grande />
                 <Text color="fg.muted" fontSize="sm">
@@ -104,7 +106,9 @@ const LineaDetalle = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(12, 1fr)' }} gap={8}>
           <GridItem colSpan={{ base: 1, lg: 7 }}>
             <Stack gap={10}>
-              <RamalesList ramales={linea.ramales} />
+              {linea.ramales.length > 0 && (
+                <RamalesList ramales={linea.ramales} />
+              )}
               <Stack gap={4}>
                 <Heading size="lg">Opiniones</Heading>
                 {opiniones.length === 0 && (

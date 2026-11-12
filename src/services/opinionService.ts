@@ -1,32 +1,22 @@
-import { opinionesEnMemoria } from '@/data/mockApi'
 import type { NuevaOpinion, Opinion } from '@/dominio/opinion'
-import { api, esperar, USE_MOCK } from './api'
+import { REST_SERVER_URL } from './api'
+import axios from 'axios'
 
 export const OpinionService = {
   // GET /opiniones
   async getOpiniones(): Promise<Opinion[]> {
-    if (USE_MOCK) {
-      await esperar()
-      return [...opinionesEnMemoria]
-    }
-    const { data } = await api.get<Opinion[]>('/opiniones')
+    const { data } = await axios.get<Opinion[]>(`${REST_SERVER_URL}/opiniones`)
     return data
   },
 
-  // POST /opiniones  { usuario, idLinea, nota, comentario }
+  // POST /lineas/{idLinea}/opinion  { usuario, nota, comentario }
   // La fecha la completa el backend (NOW()).
   async crearOpinion(nueva: NuevaOpinion): Promise<Opinion> {
-    if (USE_MOCK) {
-      await esperar()
-      const opinion: Opinion = {
-        ...nueva,
-        idOpinion: Date.now(),
-        fecha: new Date().toISOString(),
-      }
-      opinionesEnMemoria.unshift(opinion)
-      return opinion
-    }
-    const { data } = await api.post<Opinion>('/opiniones', nueva)
+    const { idLinea, ...body } = nueva
+    const { data } = await axios.post<Opinion>(
+      `${REST_SERVER_URL}/lineas/${idLinea}/opinion`,
+      body
+    )
     return data
   },
 }
