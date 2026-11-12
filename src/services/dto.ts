@@ -27,7 +27,8 @@ export type RamalDto = {
 }
 
 export type OpinionDto = {
-  id: number | null
+  id: number
+  idLinea: number
   usuario: string
   nota: number
   comentario: string

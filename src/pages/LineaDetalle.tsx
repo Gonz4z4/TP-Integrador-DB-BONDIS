@@ -20,10 +20,15 @@ import { useCatalogo } from '@/hooks/useCatalogo'
 import LineaService from '@/services/lineaService'
 import { useCallback, useEffect, useState } from 'react'
 import ErrorPage from './ErrorPage'
+import { showToast } from '@/components/toast'
+import { useSesion } from '@/context/sesion'
+import { getMensajeError } from '@/lib/errorHandler'
+import OpinionService from '@/services/opinionService'
 
 const LineaDetalle = () => {
   const { numero } = useParams()
   const { lineas, cargando, recargar } = useCatalogo()
+  const { usuario } = useSesion()
   const [detalle, setDetalle] = useState<Awaited<ReturnType<typeof LineaService.getDetalle>> | null>(null)
 
 
@@ -41,6 +46,16 @@ const cargarDetalle = useCallback(async () => {
 useEffect(() => {
   cargarDetalle()
 }, [cargarDetalle])
+
+const eliminar = async (idOpinion: number) => {   
+    try {
+      await OpinionService.eliminarOpinion(idOpinion)
+      showToast('Opinión eliminada', 'success')
+      await Promise.all([cargarDetalle(), recargar()])
+    } catch (error) {
+      showToast(getMensajeError(error), 'error')
+    }
+  }
 
    if (cargando) {
     return (
@@ -137,7 +152,11 @@ const hasta = primerRecorrido?.destinoCorto ?? ''
                   </Text>
                 )}
                 {opiniones.map((opinion) => (
-                  <OpinionCard key={opinion.idOpinion} opinion={opinion} />
+                  <OpinionCard key={opinion.idOpinion} opinion={opinion} 
+                  onEliminar={ opinion.usuario === usuario ?
+                    () => eliminar(opinion.idOpinion) : undefined
+                  }
+                  />
                 ))}
               </Stack>
             </Stack>

@@ -7,10 +7,11 @@ const LineaCard = ({ linea }: { linea: Linea }) => {
   const { desde, hasta } = linea.extremos
   const cantidad = linea.cantidadOpiniones
   return (
-    <Link asChild _hover={{ textDecoration: 'none' }}>
+    <Link asChild display="block" h="full" _hover={{ textDecoration: 'none' }}>
       <RouterLink to={`/lineas/${linea.numero}`}>
         <Box
           role="group"
+          w="full"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -25,6 +26,7 @@ const LineaCard = ({ linea }: { linea: Linea }) => {
               minW="16"
               h="16"
               px={2}
+              flexShrink={0}
               borderRadius="md"
               bg="brand.solid"
               color="brand.contrast"
@@ -34,7 +36,9 @@ const LineaCard = ({ linea }: { linea: Linea }) => {
               fontWeight="extrabold"
               fontSize={linea.nombre.length > 3 ? 'lg' : '3xl'}
             >
-              {linea.nombre}
+              <Text truncate title={linea.nombre}>
+                {linea.nombre}
+              </Text>
             </Flex>
             <Stack gap={1} flex="1" minW="0">
               {(desde || hasta) && (
