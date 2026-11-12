@@ -9,20 +9,27 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { type FormEvent, useState } from 'react'
-import { MdDirectionsBus, MdSearch } from 'react-icons/md'
+import { MdDirectionsBus, MdLogout, MdSearch } from 'react-icons/md'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import LinkButton from '@/components/link-button'
-import { InputGroup } from '@/components/ui/input-group'
 import { ColorModeButton } from '@/components/ui/color-mode'
+import { InputGroup } from '@/components/ui/input-group'
+import { useSesion } from '@/context/sesion'
 
 const Header = () => {
   const [busqueda, setBusqueda] = useState('')
   const navigate = useNavigate()
+  const { usuario, salir } = useSesion()
 
   const buscar = (e: FormEvent) => {
     e.preventDefault()
     const q = busqueda.trim()
     navigate(q ? `/lineas?q=${encodeURIComponent(q)}` : '/lineas')
+  }
+
+  const cerrarSesion = () => {
+    salir()
+    navigate('/ingresar', { replace: true })
   }
 
   return (
@@ -59,12 +66,22 @@ const Header = () => {
               <LinkButton to="/lineas" w="auto" size="sm">
                 Líneas
               </LinkButton>
+              <LinkButton to="/mis-opiniones" w="auto" size="sm">
+                Mis opiniones
+              </LinkButton>
             </HStack>
           </HStack>
 
           <HStack gap={3}>
-            <Box as="form" onSubmit={buscar} display={{ base: 'none', sm: 'block' }}>
-              <InputGroup w="15rem" startElement={<Icon as={MdSearch} color="fg.muted" />}>
+            <Box
+              as="form"
+              onSubmit={buscar}
+              display={{ base: 'none', lg: 'block' }}
+            >
+              <InputGroup
+                w="15rem"
+                startElement={<Icon as={MdSearch} color="fg.muted" />}
+              >
                 <Input
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
@@ -76,10 +93,33 @@ const Header = () => {
               </InputGroup>
             </Box>
 
-            <ColorModeButton color="fg.muted" _hover={{ bg: 'bg.emphasized', color: 'fg' }} />
+            <ColorModeButton
+              color="fg.muted"
+              _hover={{ bg: 'bg.emphasized', color: 'fg' }}
+            />
 
-            <Button asChild colorPalette="brand" size="sm" fontWeight="bold">
-              <RouterLink to="/lineas">Opinar</RouterLink>
+            <Text
+              fontSize="sm"
+              fontWeight="bold"
+              maxW="32"
+              lineClamp={1}
+              display={{ base: 'none', sm: 'block' }}
+              title={usuario ?? undefined}
+            >
+              {usuario}
+            </Text>
+
+            <Button
+              size="sm"
+              variant="outline"
+              colorPalette="brand"
+              onClick={cerrarSesion}
+              aria-label="Cerrar sesión"
+            >
+              <Icon as={MdLogout} />
+              <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                Salir
+              </Text>
             </Button>
           </HStack>
         </Flex>

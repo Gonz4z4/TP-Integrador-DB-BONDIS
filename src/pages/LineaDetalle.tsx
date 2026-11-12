@@ -17,13 +17,47 @@ import NotaBadge from '@/components/opiniones/NotaBadge'
 import OpinionCard from '@/components/opiniones/OpinionCard'
 import OpinionForm from '@/components/opiniones/OpinionForm'
 import { useCatalogo } from '@/hooks/useCatalogo'
+import LineaService from '@/services/lineaService'
+import { useCallback, useEffect, useState } from 'react'
 import ErrorPage from './ErrorPage'
+import { showToast } from '@/components/toast'
+import { useSesion } from '@/context/sesion'
+import { getMensajeError } from '@/lib/errorHandler'
+import OpinionService from '@/services/opinionService'
 
 const LineaDetalle = () => {
   const { numero } = useParams()
   const { lineas, cargando, recargar } = useCatalogo()
+  const { usuario } = useSesion()
+  const [detalle, setDetalle] = useState<Awaited<ReturnType<typeof LineaService.getDetalle>> | null>(null)
 
-  if (cargando) {
+
+const linea = lineas.find((l) => l.numero === numero)
+
+const cargarDetalle = useCallback(async () => {
+  if (!linea?.idLinea) return
+  try {
+    setDetalle(await LineaService.getDetalle(linea.idLinea))
+  } catch (e) {
+    console.error('Error cargando detalle', e)
+  }
+}, [linea?.idLinea])
+
+useEffect(() => {
+  cargarDetalle()
+}, [cargarDetalle])
+
+const eliminar = async (idOpinion: number) => {   
+    try {
+      await OpinionService.eliminarOpinion(idOpinion)
+      showToast('Opinión eliminada', 'success')
+      await Promise.all([cargarDetalle(), recargar()])
+    } catch (error) {
+      showToast(getMensajeError(error), 'error')
+    }
+  }
+
+   if (cargando) {
     return (
       <Flex justify="center" py={24}>
         <Spinner color="brand.solid" />
@@ -31,16 +65,17 @@ const LineaDetalle = () => {
     )
   }
 
-  const linea = lineas.find((l) => l.numero === numero)
-  if (!linea) {
-    return <ErrorPage />
-  }
+  if (!linea) return <ErrorPage />
 
-  const { desde, hasta } = linea.extremos
-  const opiniones = [...linea.opiniones].sort(
-    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-  )
-  const cantidad = linea.cantidadOpiniones
+const ramales = detalle?.ramales ?? []
+const opiniones = [...(detalle?.opiniones ?? [])].sort(
+  (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+)
+const cantidad = linea.cantidadOpiniones
+
+const primerRecorrido = ramales[0]?.ida ?? ramales[0]?.vuelta
+const desde = primerRecorrido?.origenCorto ?? ''
+const hasta = primerRecorrido?.destinoCorto ?? ''
 
   return (
     <>
@@ -106,8 +141,8 @@ const LineaDetalle = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(12, 1fr)' }} gap={8}>
           <GridItem colSpan={{ base: 1, lg: 7 }}>
             <Stack gap={10}>
-              {linea.ramales.length > 0 && (
-                <RamalesList ramales={linea.ramales} />
+              {ramales.length > 0 && (
+                <RamalesList ramales={ramales} />
               )}
               <Stack gap={4}>
                 <Heading size="lg">Opiniones</Heading>
@@ -117,14 +152,18 @@ const LineaDetalle = () => {
                   </Text>
                 )}
                 {opiniones.map((opinion) => (
-                  <OpinionCard key={opinion.idOpinion} opinion={opinion} />
+                  <OpinionCard key={opinion.idOpinion} opinion={opinion} 
+                  onEliminar={ opinion.usuario === usuario ?
+                    () => eliminar(opinion.idOpinion) : undefined
+                  }
+                  />
                 ))}
               </Stack>
             </Stack>
           </GridItem>
 
           <GridItem colSpan={{ base: 1, lg: 5 }}>
-            <OpinionForm linea={linea} onCreada={recargar} />
+            <OpinionForm linea={linea} onCreada={() => { cargarDetalle(); recargar() }} />
           </GridItem>
         </Grid>
       </Container>

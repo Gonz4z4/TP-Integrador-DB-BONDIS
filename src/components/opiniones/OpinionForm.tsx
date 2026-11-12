@@ -4,12 +4,13 @@ import {
   Field,
   Heading,
   HStack,
-  Input,
   Stack,
+  Text,
   Textarea,
 } from '@chakra-ui/react'
 import { type FormEvent, useState } from 'react'
 import { showToast } from '@/components/toast'
+import { useSesion } from '@/context/sesion'
 import type { Linea } from '@/dominio/linea'
 import { NOTA_MAXIMA, NOTA_MINIMA } from '@/dominio/opinion'
 import { getMensajeError } from '@/lib/errorHandler'
@@ -25,21 +26,24 @@ const NOTAS = Array.from(
   (_, i) => NOTA_MINIMA + i
 )
 
-// Los campos son las columnas de la tabla opiniones (la opinión es de la línea).
+// El usuario sale de la sesión: ya no se escribe en cada opinión.
 const OpinionForm = ({ linea, onCreada }: OpinionFormProps) => {
-  const [usuario, setUsuario] = useState('')
+  const { usuario } = useSesion()
   const [nota, setNota] = useState(0)
   const [comentario, setComentario] = useState('')
   const [enviando, setEnviando] = useState(false)
 
-  const valido = usuario.trim() !== '' && nota > 0 && comentario.trim() !== ''
+  const valido = !!usuario && nota > 0 && comentario.trim() !== ''
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault()
+    if (!usuario) {
+      return
+    }
     setEnviando(true)
     try {
       await OpinionService.crearOpinion({
-        usuario: usuario.trim(),
+        usuario,
         idLinea: linea.idLinea,
         nota,
         comentario: comentario.trim(),
@@ -66,17 +70,12 @@ const OpinionForm = ({ linea, onCreada }: OpinionFormProps) => {
       p={5}
     >
       <Stack gap={4}>
-        <Heading size="md">Dejá tu opinión sobre la {linea.nombre}</Heading>
-
-        <Field.Root required>
-          <Field.Label>Tu usuario</Field.Label>
-          <Input
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-            maxLength={50}
-            bg="bg.subtle"
-          />
-        </Field.Root>
+        <Stack gap={1}>
+          <Heading size="md">Dejá tu opinión sobre la {linea.nombre}</Heading>
+          <Text fontSize="sm" color="fg.muted">
+            Vas a publicarla como <b>{usuario}</b>.
+          </Text>
+        </Stack>
 
         <Field.Root required>
           <Field.Label>Nota</Field.Label>
