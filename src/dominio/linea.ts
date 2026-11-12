@@ -44,7 +44,11 @@ export class Linea {
     public jurisdiccion: string,
     public camara: string,
     public ramales: Ramal[] = [],
-    public opiniones: Opinion[] = []
+    public opiniones: Opinion[] = [],
+    private readonly resumen?: {
+      promedio: number | null
+      cantidadOpiniones: number
+    }
   ) {}
 
   /** "004" -> "4"; "EBUS" -> "EBUS" */
@@ -57,11 +61,14 @@ export class Linea {
   }
 
   get cantidadOpiniones() {
-    return this.opiniones.length
+    return this.resumen?.cantidadOpiniones ?? this.opiniones.length
   }
 
   /** Promedio de notas (1 a 10) o null si todavía no hay opiniones. */
   get promedio(): number | null {
+    if (this.resumen) {
+      return this.resumen.promedio
+    }
     if (!this.opiniones.length) {
       return null
     }

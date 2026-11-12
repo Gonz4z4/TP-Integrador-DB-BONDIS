@@ -36,6 +36,26 @@ describe('Linea', () => {
     expect(l.promedio).toBe(7.5)
   })
 
+  test('usa promedio y cantidad de opiniones enviados por el backend', () => {
+    const l = new Linea(1, '004', 'CABA', 'ACTA', [], [], {
+      promedio: 5,
+      cantidadOpiniones: 1,
+    })
+
+    expect(l.promedio).toBe(5)
+    expect(l.cantidadOpiniones).toBe(1)
+  })
+
+  test('mantiene null como promedio cuando el backend no tiene opiniones', () => {
+    const l = new Linea(2, '007', 'CABA', 'CETUBA', [], [], {
+      promedio: null,
+      cantidadOpiniones: 0,
+    })
+
+    expect(l.promedio).toBeNull()
+    expect(l.cantidadOpiniones).toBe(0)
+  })
+
   test('extremos limpia los nombres de las terminales', () => {
     expect(linea().extremos).toEqual({
       desde: 'Lomas del Mirador',
