@@ -48,4 +48,24 @@ describe('LineaService', () => {
     expect(resultado[0].promedio).toBeNull()
     expect(resultado[0].cantidadOpiniones).toBe(0)
   })
+
+  test('normaliza ceros iniciales y registra el error al usar el respaldo', async () => {
+    const error = new Error('Backend no disponible')
+    vi.spyOn(axios, 'get').mockRejectedValue(error)
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const resultado = await LineaService.buscarLineas('4')
+
+    expect(resultado.map((linea) => linea.numero)).toContain('004')
+    expect(errorLog).toHaveBeenCalledWith('Error al buscar líneas', error)
+  })
+
+  test('acepta el prefijo línea en la búsqueda numérica de respaldo', async () => {
+    vi.spyOn(axios, 'get').mockRejectedValue(new Error('Backend no disponible'))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const resultado = await LineaService.buscarLineas('Línea 4')
+
+    expect(resultado.map((linea) => linea.numero)).toContain('004')
+  })
 })

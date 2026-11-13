@@ -1,21 +1,6 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useSesion } from '@/context/sesion'
+import { Outlet } from 'react-router-dom'
 
-/** Si no hay sesión, manda a /ingresar y recuerda a dónde quería ir. */
-const RutaProtegida = () => {
-  const { usuario } = useSesion()
-  const location = useLocation()
-
-  if (!usuario) {
-    return (
-      <Navigate
-        to="/ingresar"
-        replace
-        state={{ desde: `${location.pathname}${location.search}` }}
-      />
-    )
-  }
-  return <Outlet />
-}
+/** La aplicación se usa sin sesión por defecto durante la navegación. */
+const RutaProtegida = () => <Outlet />
 
 export default RutaProtegida

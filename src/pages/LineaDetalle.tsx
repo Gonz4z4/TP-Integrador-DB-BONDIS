@@ -24,24 +24,38 @@ import { showToast } from '@/components/toast'
 import { useSesion } from '@/context/sesion'
 import { getMensajeError } from '@/lib/errorHandler'
 import OpinionService from '@/services/opinionService'
+import type { Linea } from '@/dominio/linea'
 
 const LineaDetalle = () => {
   const { numero } = useParams()
   const { lineas, cargando, recargar } = useCatalogo()
   const { usuario } = useSesion()
-  const [detalle, setDetalle] = useState<Awaited<ReturnType<typeof LineaService.getDetalle>> | null>(null)
+  const [detalle, setDetalle] = useState<Pick<Linea, 'ramales' | 'opiniones'> | null>(null)
 
+  const linea = lineas.find((l) => l.numero === numero)
 
-const linea = lineas.find((l) => l.numero === numero)
+  const cargarDetalle = useCallback(async () => {
+    if (!linea?.idLinea) {
+      return
+    }
 
-const cargarDetalle = useCallback(async () => {
-  if (!linea?.idLinea) return
-  try {
-    setDetalle(await LineaService.getDetalle(linea.idLinea))
-  } catch (e) {
-    console.error('Error cargando detalle', e)
-  }
-}, [linea?.idLinea])
+    try {
+      const datos = await LineaService.buscarLineas(String(linea.idLinea))
+      const detalleLinea = datos[0] as Partial<DetalleLinea> | undefined
+
+      if (!detalleLinea) {
+        setDetalle({ ramales: [], opiniones: [] })
+        return
+      }
+
+      setDetalle({
+        ramales: detalleLinea.ramales ?? [],
+        opiniones: detalleLinea.opiniones ?? [],
+      })
+    } catch (e) {
+      console.error('Error cargando detalle', e)
+    }
+  }, [linea?.idLinea])
 
 useEffect(() => {
   cargarDetalle()

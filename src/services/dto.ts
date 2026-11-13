@@ -5,6 +5,8 @@ export type LineaDto = {
   camara: string
   promedio?: number | null
   cantidadOpiniones?: number
+  ramales?: RamalDto[]
+  opiniones?: OpinionDto[]
 }
 
 export type TerminalDto = {
