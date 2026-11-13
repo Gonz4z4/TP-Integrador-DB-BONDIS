@@ -12,19 +12,16 @@ import { type FormEvent, useState } from 'react'
 import { showToast } from '@/components/toast'
 import { useSesion } from '@/context/sesion'
 import type { Linea } from '@/dominio/linea'
-import { NOTA_MAXIMA, NOTA_MINIMA } from '@/dominio/opinion'
 import { getMensajeError } from '@/lib/errorHandler'
 import OpinionService from '@/services/opinionService'
+import {NOTAS} from '@/dominio/opinion'
 
 type OpinionFormProps = {
   linea: Linea
   onCreada: () => void
 }
 
-const NOTAS = Array.from(
-  { length: NOTA_MAXIMA - NOTA_MINIMA + 1 },
-  (_, i) => NOTA_MINIMA + i
-)
+
 
 // El usuario sale de la sesión: ya no se escribe en cada opinión.
 const OpinionForm = ({ linea, onCreada }: OpinionFormProps) => {

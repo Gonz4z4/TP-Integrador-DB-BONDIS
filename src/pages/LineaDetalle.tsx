@@ -1,16 +1,5 @@
 import {
-  Badge,
-  Box,
-  Container,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  HStack,
-  Spinner,
-  Stack,
-  Text,
-} from '@chakra-ui/react'
+  Badge, Box, Container, Flex, Grid, GridItem, Heading, HStack, Spinner, Stack, Text} from '@chakra-ui/react'
 import { useParams } from 'react-router-dom'
 import RamalesList from '@/components/lineas/RamalesList'
 import NotaBadge from '@/components/opiniones/NotaBadge'
@@ -22,6 +11,10 @@ import { showToast } from '@/components/toast'
 import { useSesion } from '@/context/sesion'
 import { getMensajeError } from '@/lib/errorHandler'
 import OpinionService from '@/services/opinionService'
+import type { Opinion } from '@/dominio/opinion'
+import { useEffect, useState } from 'react'
+import type { Ramal } from '@/dominio/linea'
+import LineaService from '@/services/lineaService'
 
 const LineaDetalle = () => {
   const { numero } = useParams()
@@ -29,6 +22,26 @@ const LineaDetalle = () => {
   const { usuario } = useSesion()
 
   const linea = lineas.find((l) => l.numero === numero)
+  const idLinea = linea?.idLinea
+
+  const [ramalesDetalle, setRamalesDetalle] = useState<Ramal[] | null>(null)
+
+  useEffect(() => {
+  if (idLinea === undefined) {
+    return
+  }
+  let vigente = true
+  LineaService.getDetalle(idLinea)
+    .then((detalle) => {
+      if (vigente) {
+        setRamalesDetalle(detalle.ramales)
+      }
+    })
+    .catch((error) => showToast(getMensajeError(error), 'error'))
+  return () => {
+    vigente = false
+  }
+}, [idLinea])
 
   const eliminar = async (idOpinion: number) => {
     try {
@@ -40,6 +53,16 @@ const LineaDetalle = () => {
     }
   }
 
+  const editar = async (opinion: Opinion, nota: number, comentario: string) => {
+  await OpinionService.editarOpinion(opinion.idOpinion, {
+    usuario: opinion.usuario,
+    nota,
+    comentario,
+  })
+  showToast('Opinión actualizada', 'success')
+  await recargar()
+}
+
   if (cargando) {
     return (
       <Flex justify="center" py={24}>
@@ -50,7 +73,8 @@ const LineaDetalle = () => {
 
   if (!linea) { return <ErrorPage /> }
 
-  const ramales = linea.ramales
+  const ramales = ramalesDetalle ?? linea.ramales
+  const modalidades = [...new Set(ramales.map((r) => r.modalidad))]
   const opiniones = [...linea.opiniones].sort(
     (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
   )
@@ -91,7 +115,7 @@ const LineaDetalle = () => {
                 <Badge bg="bg.muted" color="fg.muted">
                   {linea.jurisdiccion}
                 </Badge>
-                {linea.modalidades.map((m) => (
+                {modalidades.map((m) => (
                   <Badge key={m} bg="bg.muted" color="fg.muted">
                     {m}
                   </Badge>
@@ -137,8 +161,8 @@ const LineaDetalle = () => {
                 {opiniones.map((opinion) => (
                   <OpinionCard key={opinion.idOpinion} opinion={opinion} 
                   onEliminar={ opinion.usuario === usuario ?
-                    () => eliminar(opinion.idOpinion) : undefined
-                  }
+                    () => eliminar(opinion.idOpinion) : undefined}
+                  onEditar={opinion.usuario === usuario ? (n, c) => editar(opinion, n, c) : undefined}
                   />
                 ))}
               </Stack>

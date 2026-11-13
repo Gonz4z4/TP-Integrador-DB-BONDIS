@@ -1,4 +1,4 @@
-import type { NuevaOpinion, Opinion } from '@/dominio/opinion'
+import type { NuevaOpinion, Opinion, EdicionOpinion } from '@/dominio/opinion'
 import type { OpinionDto } from './dto'
 import { REST_SERVER_URL } from './api'
 import axios from 'axios'
@@ -33,6 +33,14 @@ export const OpinionService = {
 
   async eliminarOpinion(idOpinion: number): Promise<void> {
     await axios.delete(`${REST_SERVER_URL}/opiniones/${idOpinion}`)
+  },
+
+  async editarOpinion(idOpinion: number, cambios: EdicionOpinion): Promise<Opinion> {
+    const { data } = await axios.put<OpinionDto>(
+      `${REST_SERVER_URL}/opiniones/${idOpinion}`,
+      cambios
+    )
+    return aOpinion(data)
   },
 }
 

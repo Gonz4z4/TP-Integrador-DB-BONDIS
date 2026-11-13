@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Linea, Ramal, Recorrido } from '@/dominio/linea'
 import type { Opinion } from '@/dominio/opinion'
-import type { LineaDto, OpinionDto, RamalDto, RecorridoDto } from './dto'
+import type { LineaDetalleDto, LineaDto, OpinionDto, RamalDto, RecorridoDto } from './dto'
 import { REST_SERVER_URL } from './api'
 
 const fallbackLineas: LineaDto[] = [
@@ -185,6 +185,26 @@ export const LineaService = {
       return data.map(aLinea)
     } catch {
       return fallbackLineas.map(aLinea)
+    }
+  },
+
+    // GET /lineas/{id}  -> { linea, ramales, opiniones }
+  async getDetalle(idLinea: number): Promise<Linea> {
+    try {
+      const { data } = await axios.get<LineaDetalleDto>(
+        `${REST_SERVER_URL}/lineas/${idLinea}`
+      )
+      return aLinea({
+        ...data.linea,
+        ramales: data.ramales,
+        opiniones: data.opiniones,
+      })
+    } catch (error) {
+      const respaldo = fallbackLineas.find((l) => l.id === idLinea)
+      if (!respaldo) {
+        throw error
+      }
+      return aLinea(respaldo)
     }
   },
 

@@ -16,6 +16,7 @@ import { useCatalogo } from '@/hooks/useCatalogo'
 import { showToast } from '@/components/toast'
 import { getMensajeError } from '@/lib/errorHandler'
 import OpinionService from '@/services/opinionService'
+import type { Opinion } from '@/dominio/opinion'
 
 const mismoUsuario = (a: string, b: string) =>
   a.trim().toLowerCase() === b.trim().toLowerCase()
@@ -33,6 +34,16 @@ const MisOpiniones = () => {
         showToast(getMensajeError(error), 'error')
     }
   }
+
+  const editar = async (opinion: Opinion, nota: number, comentario: string) => {
+  await OpinionService.editarOpinion(opinion.idOpinion, {
+    usuario: opinion.usuario,
+    nota,
+    comentario,
+  })
+  showToast('Opinión actualizada', 'success')
+  await recargar()
+}
 
   const mias = opiniones
     .filter((o) => usuario !== null && mismoUsuario(o.usuario, usuario))
@@ -88,6 +99,7 @@ const MisOpiniones = () => {
             opinion={opinion}
             linea={lineas.find((l) => l.idLinea === opinion.idLinea)}
             onEliminar={() => eliminar(opinion.idOpinion)}
+            onEditar={(n, c) => editar(opinion, n, c)}
           />
         ))}
       </Stack>
