@@ -64,7 +64,7 @@ export class Linea {
     return this.resumen?.cantidadOpiniones ?? this.opiniones.length
   }
 
-  /** Promedio de notas (1 a 10) o null si todavía no hay opiniones. */
+  /** Promedio de notas (1 a 5) o null si todavía no hay opiniones. */
   get promedio(): number | null {
     if (this.resumen) {
       return this.resumen.promedio

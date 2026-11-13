@@ -10,7 +10,7 @@ const fallbackLineas: LineaDto[] = [
     numero: '004',
     jurisdiccion: 'CABA',
     camara: 'ACTA',
-    promedio: 7.5,
+    promedio: 5,
     cantidadOpiniones: 1,
     ramales: [
       {

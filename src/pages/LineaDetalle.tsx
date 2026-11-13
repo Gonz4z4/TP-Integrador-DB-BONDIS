@@ -17,61 +17,30 @@ import NotaBadge from '@/components/opiniones/NotaBadge'
 import OpinionCard from '@/components/opiniones/OpinionCard'
 import OpinionForm from '@/components/opiniones/OpinionForm'
 import { useCatalogo } from '@/hooks/useCatalogo'
-import LineaService from '@/services/lineaService'
-import { useCallback, useEffect, useState } from 'react'
 import ErrorPage from './ErrorPage'
 import { showToast } from '@/components/toast'
 import { useSesion } from '@/context/sesion'
 import { getMensajeError } from '@/lib/errorHandler'
 import OpinionService from '@/services/opinionService'
-import type { Linea } from '@/dominio/linea'
 
 const LineaDetalle = () => {
   const { numero } = useParams()
   const { lineas, cargando, recargar } = useCatalogo()
   const { usuario } = useSesion()
-  const [detalle, setDetalle] = useState<Pick<Linea, 'ramales' | 'opiniones'> | null>(null)
 
   const linea = lineas.find((l) => l.numero === numero)
 
-  const cargarDetalle = useCallback(async () => {
-    if (!linea?.idLinea) {
-      return
-    }
-
-    try {
-      const datos = await LineaService.buscarLineas(String(linea.idLinea))
-      const detalleLinea = datos[0] as Partial<DetalleLinea> | undefined
-
-      if (!detalleLinea) {
-        setDetalle({ ramales: [], opiniones: [] })
-        return
-      }
-
-      setDetalle({
-        ramales: detalleLinea.ramales ?? [],
-        opiniones: detalleLinea.opiniones ?? [],
-      })
-    } catch (e) {
-      console.error('Error cargando detalle', e)
-    }
-  }, [linea?.idLinea])
-
-useEffect(() => {
-  cargarDetalle()
-}, [cargarDetalle])
-
-const eliminar = async (idOpinion: number) => {   
+  const eliminar = async (idOpinion: number) => {
     try {
       await OpinionService.eliminarOpinion(idOpinion)
       showToast('Opinión eliminada', 'success')
-      await Promise.all([cargarDetalle(), recargar()])
+      await recargar()
     } catch (error) {
       showToast(getMensajeError(error), 'error')
     }
   }
 
-   if (cargando) {
+  if (cargando) {
     return (
       <Flex justify="center" py={24}>
         <Spinner color="brand.solid" />
@@ -79,17 +48,17 @@ const eliminar = async (idOpinion: number) => {
     )
   }
 
-  if (!linea) return <ErrorPage />
+  if (!linea) { return <ErrorPage /> }
 
-const ramales = detalle?.ramales ?? []
-const opiniones = [...(detalle?.opiniones ?? [])].sort(
-  (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-)
-const cantidad = linea.cantidadOpiniones
+  const ramales = linea.ramales
+  const opiniones = [...linea.opiniones].sort(
+    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+  )
+  const cantidad = linea.cantidadOpiniones
 
-const primerRecorrido = ramales[0]?.ida ?? ramales[0]?.vuelta
-const desde = primerRecorrido?.origenCorto ?? ''
-const hasta = primerRecorrido?.destinoCorto ?? ''
+  const primerRecorrido = ramales[0]?.ida ?? ramales[0]?.vuelta
+  const desde = primerRecorrido?.origenCorto ?? ''
+  const hasta = primerRecorrido?.destinoCorto ?? ''
 
   return (
     <>
@@ -177,7 +146,7 @@ const hasta = primerRecorrido?.destinoCorto ?? ''
           </GridItem>
 
           <GridItem colSpan={{ base: 1, lg: 5 }}>
-            <OpinionForm linea={linea} onCreada={() => { cargarDetalle(); recargar() }} />
+            <OpinionForm linea={linea} onCreada={recargar} />
           </GridItem>
         </Grid>
       </Container>

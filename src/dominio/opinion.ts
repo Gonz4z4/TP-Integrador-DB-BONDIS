@@ -14,4 +14,4 @@ export type NuevaOpinion = Pick<
 >
 
 export const NOTA_MINIMA = 1
-export const NOTA_MAXIMA = 10
+export const NOTA_MAXIMA = 5

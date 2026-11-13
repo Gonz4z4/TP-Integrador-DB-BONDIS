@@ -79,12 +79,12 @@ const OpinionForm = ({ linea, onCreada }: OpinionFormProps) => {
 
         <Field.Root required>
           <Field.Label>Nota</Field.Label>
-          <HStack gap={1} wrap="wrap">
+          <HStack w="full" justify="space-between" wrap="wrap">
             {NOTAS.map((n) => (
               <Button
                 key={n}
                 type="button"
-                size="xs"
+                size="xl"
                 minW="8"
                 colorPalette="brand"
                 variant={nota === n ? 'solid' : 'outline'}

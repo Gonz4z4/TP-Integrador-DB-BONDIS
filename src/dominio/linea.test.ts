@@ -32,8 +32,8 @@ describe('Linea', () => {
   test('promedio es null sin opiniones y el promedio simple con opiniones', () => {
     const l = linea()
     expect(l.promedio).toBeNull()
-    l.opiniones = [opinion(1, 10), opinion(2, 5)]
-    expect(l.promedio).toBe(7.5)
+    l.opiniones = [opinion(1, 5), opinion(2, 3)]
+    expect(l.promedio).toBe(4)
   })
 
   test('usa promedio y cantidad de opiniones enviados por el backend', () => {
